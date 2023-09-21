@@ -22,12 +22,18 @@
     - Apply each core (not thread) that is not 0 and is available to each type of devices that is being looked up (Mouse, LAN, GPU, Audio USB) and their proper parent device
     - Keyboard will be disabled by default
 
-	---------------------------
+  I added option to optionally disable MSI in both Mouse and Ethernet back, because in some cases it's an option to consider, but not for other devices imho. Since Non-MSI may have a simple interrupt implementation leading to lower latency, since the MSI does not have instant processing.
+  I would say for Mouse and Ethernet is worth considering IRQ/Legacy Interrupt vs MSI-X, but not MSI, since MSI-X is also known to have lower latency, but since it's still MSI, it might also not have instant processing, not that the legacy implementation does. 
+  It will be based on what works for you.
 
-	If a device has both MSI and MSI-X, MSI-X will take precedence and hard limit is the size of the vector. Regardless of the value set, it will be capped on that limit, this is based on a documentation.
-	https://docs.kernel.org/PCI/msi-howto.html#using-msi
+  I read somewhere that setting a higher limit value than the hard limit of the device could be detrimental to the device performance, I have not confirmed, so, it's just information at this point. A possible way would be just to set the limit to the hard limit of the device and leave as that.
 
-	Even though there are cases of driver manufactors setting a higher limit, nothing is proven that they are in fact bypassing that hard limit. But still it could be a possibility as if setting the vector size, but it's not been confirmed. It would require verification.
+  ---------------------------
+
+  If a device has both MSI and MSI-X, MSI-X will take precedence and hard limit is the size of the vector. Regardless of the value set, it will be capped on that limit, this is based on a documentation.
+  https://docs.kernel.org/PCI/msi-howto.html#using-msi
+
+  Even though there are cases of driver manufactors setting a higher limit, nothing is proven that they are in fact bypassing that hard limit. But still it could be a possibility as if setting the vector size, but it's not been confirmed. It would require verification.
 
   ---------------------------
 
@@ -222,7 +228,7 @@ foreach ($item in $relevantData) {
 
 # Apply interrupt affinity tweaks
 foreach ($item in $relevantData) {
-	if ($item.ClassType -eq 'Mouse' -or $item.ClassType -eq 'Keyboard') {
+	if ($item.ClassType -eq 'Mouse' -or $item.ClassType -eq 'Keyboard' -or $item.ClassType -eq 'Net') {
 		Apply-IRQ-Priotity-Optimization -IRQValue $item.ParentDeviceIRQ
 	}
 
@@ -237,10 +243,16 @@ foreach ($item in $relevantData) {
 	if ($item.ClassType -eq 'Net') {
 		Set-ItemProperty -Path $childAffinityPath -Name "DevicePriority" -Value 3 -Force -Type Dword -ErrorAction Ignore
 		Set-ItemProperty -Path $childMsiPath -Name "MessageNumberLimit" -Value 2048 -Force -Type Dword -ErrorAction Ignore
+
+		# Option will be here as to consider MSI-X vs IRQ/Legacy interrupts.
+		# Set-ItemProperty -Path $childMsiPath -Name "MSISupported" -Value 0 -Force -Type Dword -ErrorAction Ignore
 	}
 	if ($item.ClassType -eq 'Mouse') {
 	 	Set-ItemProperty -Path $parentAffinityPath -Name "DevicePriority" -Value 3 -Force -Type Dword -ErrorAction Ignore
 		Set-ItemProperty -Path $parentMsiPath -Name "MessageNumberLimit" -Value 2048 -Force -Type Dword -ErrorAction Ignore
+
+		# Option will be here as to consider MSI-X vs IRQ/Legacy interrupts.
+		# Set-ItemProperty -Path $parentMsiPath -Name "MSISupported" -Value 0 -Force -Type Dword -ErrorAction Ignore
 	}
 	if ($item.ClassType -eq 'Display') {
 		Set-ItemProperty -Path $childMsiPath -Name "MessageNumberLimit" -Value 32 -Force -Type Dword -ErrorAction Ignore
