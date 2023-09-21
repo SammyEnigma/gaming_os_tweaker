@@ -142,6 +142,7 @@ It doesnt mean they arent trustworthy, I don't know them, it just means it's not
   - <https://github.com/vinaypamnani/wmie2>
   - <https://www.privacytools.io/>
   - <https://github.com/simeononsecurity/Windows-Optimize-Harden-Debloat>
+  - <https://eternallybored.org/misc/pciutils/>
 
 - Places that could be informative
   - <https://www.youtube.com/watch?v=6CB8P0-hJRQ>
