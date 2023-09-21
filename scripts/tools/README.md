@@ -11,6 +11,6 @@
 - KX Utility - <https://github.com/Faintsnow/HE/issues/5#issuecomment-1172197067>
 
 - Nvidia Control Panel - It's here if someone are unable to install from the driver into their system, not an actual helper tool.
-  - If `nvcplui.exe` get a block message, it means you might have a ownership problem. I added a file inside called `ownership_fix.cmd` that should help with the problem.
+  - If `nvcplui.exe` get a block message, it means you might have a ownership problem. I added a file inside called `ownership_fix.ps1` that should help with the problem.
 
 - Low Audio Latency - <https://github.com/spddl/LowAudioLatency/releases>
