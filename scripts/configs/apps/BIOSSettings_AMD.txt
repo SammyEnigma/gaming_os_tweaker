@@ -17,7 +17,7 @@ Offset	=CD
 Width	=01
 BIOS Default	=[01]Enabled
 Options	=*[00]Disabled	// Move "*" to the desired Option
-         [01]Enabled
+         [01]Enabled       // Optimally disable should be better for latency, but if you have high temp problem in your chipset, leave it enabled.
 
 Setup Question	= AB Clock Gating
 Help String	= Enable/Disable AB Internal Clock Gating
