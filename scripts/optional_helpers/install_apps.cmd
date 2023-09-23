@@ -74,7 +74,8 @@ winget install -e --id VSCodium.VSCodium
 :: winget install Calculator --accept-package-agreements
 
 :: Screenshot and more
-winget install -e --id ShareX.ShareX
+:: winget install -e --id Flameshot.Flameshot :: Simpler, less bloated in internal and external config
+:: winget install -e --id ShareX.ShareX
 
 :: Voice + Chat
 winget install -e --id Discord.Discord
