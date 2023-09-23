@@ -86,6 +86,7 @@ netsh int tcp set heuristics disabled
 :: Disabled: Greatly reduce / complete remove bufferbloat in exchange of reducing bandwidth throughput slightly, depending on your connection. If not worth enough, I suggest the "normal" value instead.
 :: It will resolve the bufferbloat only in your machine, if you are making downloads/uploads while playing. It will NOT resolve the issue in your whole network, for that to happen it needs to be in the router, and your router and routerOS must support and enable it.
 :: Why router and routerOS, because router must have good enough hardware to be able to handle if you have a internet connection with a lot of bandwidth and routerOS as software functionality so you can enable it.
+:: Even though it's a tcp setting, and many games use UDP, you are more likely to exaust your network bandwidth with TCP than with UDP.
 :: https://www.waveform.com/tools/bufferbloat
 netsh int tcp set global autotuninglevel=disabled
 

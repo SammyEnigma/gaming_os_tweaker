@@ -23,7 +23,7 @@
     - Keyboard will be disabled by default
 
   I added option to optionally disable MSI in both Mouse and Ethernet back, because in some cases it's an option to consider, but not for other devices imho. Since Non-MSI may have a simple interrupt implementation leading to lower latency, since the MSI does not have instant processing.
-  I would say for Mouse and Ethernet is worth considering IRQ/Legacy Interrupt vs MSI-X, but not MSI, since MSI-X is also known to have lower latency, but since it's still MSI, it might also not have instant processing, not that the legacy implementation does. 
+  I would say for Mouse and Ethernet is worth considering IRQ/Legacy Interrupt vs MSI-X, but not MSI, since MSI-X is also known to have lower latency, but since it's still MSI, it might also not have instant processing, not that the legacy implementation does.
   It will be based on what works for you.
 
   I read somewhere that setting a higher limit value than the hard limit of the device could be detrimental to the device performance, I have not confirmed, so, it's just information at this point. A possible way would be just to set the limit to the hard limit of the device and leave as that.
@@ -160,7 +160,7 @@ for ($i=0; $i -lt $prioritizedDevices.Length; $i++) {
 	$parentDeviceInstanceId = $childPnpDevice | Where KeyName -eq 'DEVPKEY_Device_Parent' | Select -ExpandProperty Data
 
 	$parentDevice = $null
-	$parentDeviceName = ""
+	$parentDeviceName = $null
 	$parentDeviceLocationInfo = ""
 	$parentDevicePDOName = ""
 	do {
