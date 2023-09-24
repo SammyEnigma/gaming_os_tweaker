@@ -717,3 +717,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\FileSystem" /v Long
 
 :: Hide Language bar
 REG ADD "HKEY_CURRENT_USER\SOFTWARE\Microsoft\CTF\LangBar" /v ShowStatus /t REG_DWORD /d 3 /f
+
+:: (Optional) Change keyboard layout to US
+:: REG ADD "HKEY_USERS\.DEFAULT\Keyboard Layout\Preload" /v 1 /t REG_SZ /d 409 /f
+:: REG ADD "HKEY_CURRENT_USER\Keyboard Layout\Preload" /v 1 /t REG_SZ /d 409 /f
