@@ -306,6 +306,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v StridingRqEnabled /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v EnableZtt /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RxSmallPacketBypass /t REG_SZ /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v TCStallEnable /t REG_SZ /d 0 /f
 
 :: Lower might process packets faster but could increase CPU usage
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ThreadPoll /t REG_SZ /d 3000 /f
@@ -474,3 +475,6 @@ for /f %%a in ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class" /v "*Wak
         )
     )
 )
+
+:: It seems that deep packet inspection can introduce some latency to even UDP packets, a way would be to disable the Windows Filtering Platform (WFP), but not really recommended.
+:: netsh advfirewall set allprofiles state off
