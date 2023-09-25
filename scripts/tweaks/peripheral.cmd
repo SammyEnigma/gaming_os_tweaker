@@ -39,7 +39,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Input\Settings\ControllerProcesso
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Input\Settings\ControllerProcessor\CursorMagnetism" /v VelocityInDIPSPerSecond /t REG_DWORD /d 0 /f
 
 :: Tweak mouse and keyboard events queue buffer size
-:: I found that 40 is a good value, because lower, it affected the mouse small movements negatively. It could be dependant on the mouse, in how much data it uses. One should test different values and find the lowest that does not negatively effect.
+:: I found that 40 is a good value, because lower, it affected the mouse small movements negatively. It could be dependant on the mouse, in how much data it uses. One should test different values and find the lowest that does not negatively affect the devices.
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\mouclass\Parameters" /v MouseDataQueueSize /t REG_DWORD /d 40 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\kbdclass\Parameters" /v KeyboardDataQueueSize /t REG_DWORD /d 40 /f
 
@@ -147,3 +147,17 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\USB\AutomaticSurpri
 :: Disable on device soft removal
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\USBHUB\Parameters" /v DisableOnSoftRemove /t REG_DWORD /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\usbhub\hubg" /v DisableOnSoftRemove /t REG_DWORD /d 1 /f
+
+:: Optimize Bluetooth - You might need to activate services starting with Bth, if you have run the debloat/services.cmd script previously.
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v PowerManagementEnabled /t REG_DWORD /d 0 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v InquiryDuration /t REG_DWORD /d 0xffff /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v LinkSupervisionTimeout /t REG_DWORD /d 0xa /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v PageTimeout /t REG_DWORD /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v DiscoverableTimeout /t REG_DWORD /d 0x12c /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v AllowInteractiveConnect /t REG_DWORD /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v ConnectionLatency /t REG_DWORD /d 0xa /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v HighDutyCycleScanWindow /t REG_DWORD /d 0x4000 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v HighDutyCycleScanInterval /t REG_DWORD /d 0x4001 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v LowDutyCycleScanWindow /t REG_DWORD /d 0x2000 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\BTHPORT\Parameters" /v LowDutyCycleScanInterval /t REG_DWORD /d 0x2001 /f
+
