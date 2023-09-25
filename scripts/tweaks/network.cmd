@@ -50,6 +50,8 @@ powershell Set-NetAdapterAdvancedProperty -Name "*" -RegistryKeyword ULPMode -Re
 powershell Set-NetAdapterAdvancedProperty -Name "*" -RegistryKeyword LogLinkStateEvent -RegistryValue 16 -ErrorAction SilentlyContinue
 powershell Set-NetAdapterAdvancedProperty -Name "*" -RegistryKeyword *JumboPacket -RegistryValue 1514 -ErrorAction SilentlyContinue
 powershell Set-NetAdapterAdvancedProperty -Name "*" -RegistryKeyword *RSSProfile -RegistryValue 3 -ErrorAction SilentlyContinue
+powershell Set-NetAdapterAdvancedProperty -Name "*" -RegistryKeyword *PtpHardwareTimestamp -RegistryValue 1 -ErrorAction SilentlyContinue
+powershell Set-NetAdapterAdvancedProperty -Name "*" -RegistryKeyword *SoftwareTimestamp -RegistryValue 0 -ErrorAction SilentlyContinue
 
 powershell Set-NetAdapterRss -Name "*" -BaseProcessorNumber 0 -ErrorAction SilentlyContinue
 powershell Set-NetAdapterRss -Name "*" -MaxProcessorNumber %CoresQty% -ErrorAction SilentlyContinue
@@ -298,7 +300,8 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v AsyncReceiveIndicate /t REG_SZ /d 2 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RscIPv4" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RscIPv6" /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*PtpHardwareTimestamp" /t REG_DWORD /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*PtpHardwareTimestamp" /t REG_SZ /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*SoftwareTimestamp" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v StridingRqEnabled /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v EnableZtt /t REG_SZ /d 1 /f
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v CoalesceBufferSize /t REG_SZ /d 2048 /f
