@@ -11,6 +11,9 @@ set /a MTU=1400
 :: Set to a core value, non-zero
 set /a RSSBaseNumber=2
 
+:: You can make changes in the adapter and restart it
+:: powershell "Restart-NetAdapter -Name '*'"
+
 :: =============================================================================================================================================================================================
 
 :: Optmize network card settings
@@ -99,7 +102,7 @@ netsh interface ip set interface ethernet weakhostreceive=enabled
 :: https://www.cloudflare.com/learning/network-layer/what-is-mtu/ - Dont mind about MSS, that is based on the MTU value.
 :: In the internet, you will find many repetitions of the same thing and that is not complete, probably one copied from the other without fully understanding. Not that I do.
 :: To see the current MTU value set in Windows, use: netsh interface ipv4 show subinterface
-powershell "$AdapterName = $(Get-NetAdapter | Where { $_.Name -Match 'Ethernet'}).Name; netsh interface ipv4 set subinterface "$AdapterName" mtu=%MTU% store=persistent"
+powershell "$AdapterName = $(Get-NetAdapter | Where { $_.InterfaceDescription -Match 'Connection' }).Name; netsh interface ipv4 set subinterface "$AdapterName" mtu=%MTU% store=persistent"
 
 ipconfig /flushdns
 ipconfig /release
@@ -302,19 +305,18 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: https://learn.microsoft.com/en-us/windows-hardware/drivers/network/introduction-to-receive-side-scaling
 :: Run this powershell command Get-NetAdapterRss, if you want to know whether RSS are working in your machine, if the indirection table are filled, it is, if not, then it's not.
 :: Beware that, to have RSS working, you must have Task Offload enabled, along some other ones related to Offload and Checksum.
+:: If you have an Intel and indirection table are still coming out empty even after all these changes, be sure to remove the intel driver and let it default to microsoft ethernet driver or try an older version of intel.
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*NumRSSQueues" /t REG_SZ /d %CoresQty% /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RSS" /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssBaseProcNumber" /t REG_SZ /d %RSSBaseNumber% /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*MaxRssProcessors" /t REG_SZ /d %CoresQty% /f
-
-:: If the *NumaNodeId keyword is not present, then NDIS automatically selects the closest node based on hints from ACPI.
-:: REG DELETE "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*NumaNodeId" /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*NumaNodeId" /t REG_SZ /d %RSSBaseNumber% /f
-
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssMaxProcNumber" /t REG_SZ /d %LogicalProcessorsQty% /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*NumaNodeId" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssBaseProcGroup" /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssMaxProcNumber" /t REG_SZ /d %CoresQty% /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssMaxProcGroup" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RSSProfile" /t REG_SZ /d 3 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssOrVmqPreference" /t REG_SZ /d 0 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssOnHostVPorts" /t REG_SZ /d 0 /f
 
 :: NDI Tweaks
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\*NumRSSQueues" /v ParamDesc /t REG_SZ /d "Maximum Number of RSS Queues" /f
