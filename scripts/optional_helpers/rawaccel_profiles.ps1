@@ -47,13 +47,16 @@ function SetupExecuteOnStartup {
 		$taskName = "rawaccelProfileStartup"
 		$taskExists = Get-ScheduledTask | Where-Object {$_.TaskName -like $taskName }
 		$action = New-ScheduledTaskAction -Execute "$PSScriptRoot\writer.exe" -Argument "$PSScriptRoot\$profile_value"
+  		$UserName = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty UserName
+		$principal = New-ScheduledTaskPrincipal -UserID $UserName -RunLevel Highest -LogonType Interactive
+		$STSet = New-ScheduledTaskSettingsSet -ExecutionTimeLimit (New-TimeSpan -Minutes 3) -WakeToRun -AllowStartIfOnBatteries
 		if ($taskExists) {
 			Write-Host "Updating rawaccel profile startup to $profile_value"
-			Set-ScheduledTask -TaskName $taskName -Action $action
+			Set-ScheduledTask -TaskName $taskName -Action $action -Principal $principal -Settings $STSet
 		} else {
 			Write-Host "Registering rawaccel profile startup to $profile_value"
 			$trigger = New-ScheduledTaskTrigger -AtLogOn
-			Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger
+			Register-ScheduledTask -TaskName $taskName -Action $action -Trigger $trigger -Principal $principal -Settings $STSet
 		}
 		[Environment]::NewLine
 		Write-Host "Done setting up profile on startup!"
