@@ -48,6 +48,8 @@
 	Set-ExecutionPolicy -ExecutionPolicy Undefined -Scope CurrentUser -Confirm:$false -Force
 #>
 
+param([switch]$IsStartupRun = $false)
+
 # Start as administrator
 if (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole] "Administrator")) {
 	Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs; exit
@@ -87,7 +89,7 @@ function Get-Task-Info {
 function Apply-Startup-Script {
 	$TaskInfo = Get-Task-Info
 	if (!$TaskInfo.TaskExists) {
-		$action = New-ScheduledTaskAction -Execute "powershell" -Argument "-WindowStyle hidden -ExecutionPolicy Bypass -File $PSScriptRoot\interrupt_moderation_usb.ps1"
+		$action = New-ScheduledTaskAction -Execute "powershell" -Argument "-WindowStyle hidden -ExecutionPolicy Bypass -File $PSScriptRoot\interrupt_moderation_usb.ps1 -IsStartupRun"
 		$delay = New-TimeSpan -Seconds 10
 		$trigger = New-ScheduledTaskTrigger -AtLogOn -RandomDelay $delay
 		$UserName = Get-CimInstance -ClassName Win32_ComputerSystem | Select-Object -ExpandProperty UserName
@@ -334,4 +336,6 @@ Execute-IMOD-Process
 
 Startup-Ask
 
-cmd /c pause
+if ($IsStartupRun -eq $false) { 
+	cmd /c pause
+}
