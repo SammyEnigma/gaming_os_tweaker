@@ -11,8 +11,7 @@ set /a MTU=1400
 :: Set to a core value, non-zero
 set /a RSSBaseNumber=2
 
-:: You can make changes in the adapter and restart it
-:: powershell "Restart-NetAdapter -Name '*'"
+goto :on_ethernet
 
 :: =============================================================================================================================================================================================
 
@@ -238,6 +237,8 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*UDPChecksumOffloadIPv4" /t REG_SZ /d 3 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*UDPChecksumOffloadIPv6" /t REG_SZ /d 3 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*IPChecksumOffloadIPv4" /t REG_SZ /d 3 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*TCPUDPChecksumOffloadIPv4" /t REG_SZ /d 3 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*TCPUDPChecksumOffloadIPv6" /t REG_SZ /d 3 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ITR /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*InterruptModeration" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*PriorityVLANTag" /t REG_SZ /d 0 /f
@@ -247,15 +248,11 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v AdaptiveIFS /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*PMARPOffload" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*PMNSOffload" /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v WakeOnSlot /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*DeviceSleepOnDisconnect" /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReceiveScalingMode /t REG_SZ /d 1 /f
+
+:: For whatever reason, this reg was causing RSS Indirection table to not output anything.
+:: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReceiveScalingMode /t REG_SZ /d 1 /f
+
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v EnableTss /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReduceSpeedOnPowerDown /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*WakeOnPattern" /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*WakeOnMagicPacket" /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v WakeOnLink /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ULPMode /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v AllowAllSpeedsLPLU /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v WakeOnFastStartup /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RxIntModerationProfile /t REG_SZ /d 0 /f
@@ -289,8 +286,6 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*IPsecOffloadV2" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*IPsecOffloadV2IPv4" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RelaxedOrderingWrite /t REG_SZ /d 1 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*TCPUDPChecksumOffloadIPv4" /t REG_SZ /d 3 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*TCPUDPChecksumOffloadIPv6" /t REG_SZ /d 3 /f
 
 :: If Auto Negotiation are causing disconnect issues, try set 1GBps full duplex
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*SpeedDuplex" /t REG_SZ /d 6 /f
@@ -438,67 +433,66 @@ REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\wcmsvc\wifinetworkmanager" /v Wif
 REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WlanSvc\AnqpCache" /v OsuRegistrationStatus /t REG_DWORD /d 0 /f
 
 :: Disable more power saving features
-for /f %%a in ('REG QUERY "HKLM\SYSTEM\CurrentControlSet\Control\Class" /v "*WakeOnMagicPacket" /s ^| findstr "HKEY"') do (
-    for %%i in (
-			"EEE"
-			"*EEE"
-			"*FlowControl"
-			"*SelectiveSuspend"
-			"*WakeOnMagicPacket"
-			"*WakeOnPattern"
-			"AdvancedEEE"
-			"AutoDisableGigabit"
-			"AutoPowerSaveModeEnabled"
-			"EnableConnectedPowerGating"
-			"EnableDynamicPowerGating"
-			"EnableGreenEthernet"
-			"EnableModernStandby"
-			"EnablePME"
-			"EnablePowerManagement"
-			"EnableSavePowerNow"
-			"GigaLite"
-			"PowerSavingMode"
-			"ReduceSpeedOnPowerDown"
-			"ULPMode"
-			"WakeOnLink"
-			"WakeOnSlot"
-			"WakeUpModeCap"
-			"PowerDownPll"
-			"*NicAutoPowerSaver"
-			"EeePhyEnable"
-			"MasterSlave"
-			"SavePowerNowEnabled"
-			"SipsEnabled"
-			"MPC"
-			"PowerSaveMode"
-			"ApCompatMode"
-			"bLeisurePs"
-			"bLowPowerEnable"
-			"bAdvancedLPs"
-			"InactivePs"
-			"Enable9KJFTpt"
-			"DMACoalescing"
-			"PMWiFiRekeyOffload"
-			"uAPSDSupport"
-			"*PacketCoalescing"
-			"NSOffloadEnable"
-			"ARPOffloadEnable"
-			"GTKOffloadEnable"
-			"WoWLANLPSLevel"
-			"*ModernStandbyWoLMagicPacket"
-			"S5WakeOnLan"
-			"WakeOnDisconnect"
-			"WoWLANS5Support"
-			"EnableWakeOnLan"
-			"EEELinkAdvertisement"
-			"EnableWakeOnManagmentOnTCO"
-			"LogLinkStateEvent"
-    ) do (
-        for /f %%j in ('REG QUERY "%%a" /v "%%~i" ^| findstr "HKEY"') do (
-            REG ADD "%%j" /v "%%~i" /t REG_SZ /d 0 /f 1>nul 2>&1
-        )
-    )
+for %%i in (
+	"EEE"
+	"*EEE"
+	"*SelectiveSuspend"
+	"*WakeOnMagicPacket"
+	"*WakeOnPattern"
+	"AdvancedEEE"
+	"AutoDisableGigabit"
+	"AutoPowerSaveModeEnabled"
+	"EnableConnectedPowerGating"
+	"EnableDynamicPowerGating"
+	"EnableGreenEthernet"
+	"EnableModernStandby"
+	"EnablePME"
+	"EnablePowerManagement"
+	"EnableSavePowerNow"
+	"GigaLite"
+	"PowerSavingMode"
+	"ReduceSpeedOnPowerDown"
+	"ULPMode"
+	"WakeOnLink"
+	"WakeOnSlot"
+	"WakeUpModeCap"
+	"PowerDownPll"
+	"*NicAutoPowerSaver"
+	"EeePhyEnable"
+	"MasterSlave"
+	"SavePowerNowEnabled"
+	"SipsEnabled"
+	"MPC"
+	"PowerSaveMode"
+	"ApCompatMode"
+	"bLeisurePs"
+	"bLowPowerEnable"
+	"bAdvancedLPs"
+	"InactivePs"
+	"Enable9KJFTpt"
+	"DMACoalescing"
+	"PMWiFiRekeyOffload"
+	"uAPSDSupport"
+	"*PacketCoalescing"
+	"NSOffloadEnable"
+	"ARPOffloadEnable"
+	"GTKOffloadEnable"
+	"WoWLANLPSLevel"
+	"*ModernStandbyWoLMagicPacket"
+	"S5WakeOnLan"
+	"WakeOnDisconnect"
+	"WoWLANS5Support"
+	"EnableWakeOnLan"
+	"EEELinkAdvertisement"
+	"EnableWakeOnManagmentOnTCO"
+	"LogLinkStateEvent"
+	"*DeviceSleepOnDisconnect"
+) do (
+    REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "%%i" /t REG_SZ /d 0 /f
 )
 
 :: It seems that deep packet inspection can introduce some latency to even UDP packets, a way would be to disable the Windows Filtering Platform (WFP), but not really recommended.
 :: netsh advfirewall set allprofiles state off
+
+:: Restart ethernet adapter at the end
+powershell "Restart-NetAdapter -Name '*'"
