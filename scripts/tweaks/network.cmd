@@ -308,6 +308,8 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssOnHostVPorts" /t REG_SZ /d 0 /f
 
 :: For whatever reason, this reg was causing RSS Indirection table to not output anything.
+:: Only information I could find is that 0 is Static Mode and 1 is Dynamic Mode for RSS. I suppose it prefers Static Mode, and it's more performant too.
+:: Static Mode, the CPU core assignments for processing network traffic remain fixed and do not change dynamically. This means that each network queue is associated with a specific CPU core, and this assignment doesn't fluctuate based on system load or network conditions.
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReceiveScalingMode /t REG_SZ /d 1 /f
 
 :: NDI Tweaks
