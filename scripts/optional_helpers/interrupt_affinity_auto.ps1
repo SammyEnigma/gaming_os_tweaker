@@ -16,10 +16,7 @@
   Current Choices:
     - Reset all interrupt affinity related options
     - Enable MSI to everything that supports
-    - Change Priority to High in both Mouse and LAN, and Disable MSI on Mouse
-    - Higher interrupt limit to Mouse and GPU
-    - Apply each core (not thread) that is not 0 and is available to each type of devices that is being looked up (Mouse, LAN, GPU, Audio USB) and their proper parent device
-    - Keyboard will be disabled by default
+    - See everything else below on $devices.
 
   I added option to optionally disable MSI in the Mouse, because in some cases it's an option to consider, but not for other devices imho. Since legacy interrupts may have a simple interrupt implementation leading to lower latency, since the MSI does not have instant processing.
   I would say for Mouse is worth considering IRQ/Legacy Interrupt vs MSI-X, but not MSI, since MSI-X is also known to have lower latency, but since it's still MSI, it might also not have instant processing, not that the legacy implementation does.
@@ -110,7 +107,7 @@ function Get-Prioritized-Devices {
 	$allDevices = Get-PnpDevice -PresentOnly -Class $enabledClasses -Status OK
 	$prioritizedDevices = $allDevices | ForEach-Object {
 		$device = $_
-		$priorityDevice = $priorities | Where-Object { $_.Class -eq $device.Class}
+		$priorityDevice = $devices | Where-Object { $_.Class -eq $device.Class}
 		return [PsObject]@{
 			Class = $device.Class;
 			FriendlyName = $device.FriendlyName;
@@ -133,16 +130,13 @@ function Get-Devices-Data {
 		$childDeviceInstanceId = $childDevice.InstanceId
 		$childPnpDevice = Get-PnpDeviceProperty -InstanceId $childDeviceInstanceId
 
-		$childDeviceClass = $childDevice.Class
-		$isUSB = $childDeviceClass -in $enabledUSBClasses
-
 		$childPnpDeviceLocationInfo = $childPnpDevice | Where KeyName -eq 'DEVPKEY_Device_LocationInfo' | Select -ExpandProperty Data
 		$childPnpDevicePDOName = $childPnpDevice | Where KeyName -eq 'DEVPKEY_Device_PDOName' | Select -ExpandProperty Data
 
 		$parentDeviceInstanceId = $childPnpDevice | Where KeyName -eq 'DEVPKEY_Device_Parent' | Select -ExpandProperty Data
 
 		$parentDevice = $null
-		$parentDeviceName = $null
+		$parentDeviceName = ""
 		$parentDeviceLocationInfo = ""
 		$parentDevicePDOName = ""
 		do {
@@ -156,10 +150,10 @@ function Get-Devices-Data {
 			}
 			$parentDeviceLocationInfo = $parentDevice | Where KeyName -eq 'DEVPKEY_Device_LocationInfo' | Select -ExpandProperty Data
 			$parentDevicePDOName = $parentDevice | Where KeyName -eq 'DEVPKEY_Device_PDOName' | Select -ExpandProperty Data
-			if ($isUSB -and !$parentDeviceName.Contains('Controller')) {
+			if ($childDevice.IsUSB -and !$parentDeviceName.Contains('Controller')) {
 				$parentDeviceInstanceId = $parentDevice | Where KeyName -eq 'DEVPKEY_Device_Parent' | Select -ExpandProperty Data
 			}
-		} while (!$parentDeviceName.Contains('Controller') -and $isUSB)
+		} while (!$parentDeviceName.Contains('Controller') -and $childDevice.IsUSB)
 
 		if ([string]::IsNullOrWhiteSpace($parentDeviceName)) {
 			continue
@@ -176,7 +170,7 @@ function Get-Devices-Data {
 			ParentDeviceInstanceId = $parentDeviceInstanceId;
 			ParentDeviceLocationInfo = $parentDeviceLocationInfo;
 			ParentDevicePDOName = $parentDevicePDOName;
-			ClassType = $childDeviceClass;
+			ClassType = $childDevice.Class;
 			ParentDeviceIRQ = $parentDeviceAllocatedResource.IRQ
 		}
 	}
@@ -266,7 +260,9 @@ function Apply-Interrupt-Affinity-Tweaks {
 	[Environment]::NewLine
 
 	foreach ($item in $devicesData) {
-		if ($item.ClassType -eq 'Mouse' -or $item.ClassType -eq 'Keyboard' -or $item.ClassType -eq 'Net') {
+		$deviceItem = $devices | Where-Object { $_.Class -eq $item.ClassType }
+
+		if ($deviceItem.IRQPrioritization -eq $true) {
 			Apply-IRQ-Priotity-Optimization -IRQValue $item.ParentDeviceIRQ
 		}
 
@@ -278,17 +274,28 @@ function Apply-Interrupt-Affinity-Tweaks {
 		Set-ItemProperty -Path $parentAffinityPath -Name "DevicePolicy" -Value 4 -Force -Type Dword -ErrorAction Ignore
 		Set-ItemProperty -Path $childAffinityPath -Name "DevicePolicy" -Value 4 -Force -Type Dword -ErrorAction Ignore
 
-		if ($item.ClassType -eq 'Net') {
-			Set-ItemProperty -Path $childAffinityPath -Name "DevicePriority" -Value 3 -Force -Type Dword -ErrorAction Ignore
-			Set-ItemProperty -Path $childMsiPath -Name "MessageNumberLimit" -Value 2048 -Force -Type Dword -ErrorAction Ignore
+		if ($deviceItem.MSI -eq $false) {
+			if ($deviceItem.IsParentDevice -eq $true) {
+				Set-ItemProperty -Path $parentMsiPath -Name "MSISupported" -Value 0 -Force -Type Dword -ErrorAction Ignore
+			} else {
+				Set-ItemProperty -Path $childMsiPath -Name "MSISupported" -Value 0 -Force -Type Dword -ErrorAction Ignore
+			}
 		}
-		if ($item.ClassType -eq 'Mouse') {
-			Set-ItemProperty -Path $parentAffinityPath -Name "DevicePriority" -Value 3 -Force -Type Dword -ErrorAction Ignore
-			Set-ItemProperty -Path $parentMsiPath -Name "MessageNumberLimit" -Value 2048 -Force -Type Dword -ErrorAction Ignore
-			Set-ItemProperty -Path $parentMsiPath -Name "MSISupported" -Value 0 -Force -Type Dword -ErrorAction Ignore
+
+		if ($deviceItem.DevicePriority -gt 0) {
+			if ($deviceItem.IsParentDevice -eq $true) {
+				Set-ItemProperty -Path $parentAffinityPath -Name "DevicePriority" -Value $deviceItem.DevicePriority -Force -Type Dword -ErrorAction Ignore
+			} else {
+				Set-ItemProperty -Path $childAffinityPath -Name "DevicePriority" -Value $deviceItem.DevicePriority -Force -Type Dword -ErrorAction Ignore
+			}
 		}
-		if ($item.ClassType -eq 'Display') {
-			Set-ItemProperty -Path $childMsiPath -Name "MessageNumberLimit" -Value 32 -Force -Type Dword -ErrorAction Ignore
+
+		if ($deviceItem.MSILimit) {
+			if ($deviceItem.IsParentDevice -eq $true) {
+				Set-ItemProperty -Path $parentMsiPath -Name "MessageNumberLimit" -Value $deviceItem.MSILimit -Force -Type Dword -ErrorAction Ignore
+			} else {
+				Set-ItemProperty -Path $childMsiPath -Name "MessageNumberLimit" -Value $deviceItem.MSILimit -Force -Type Dword -ErrorAction Ignore
+			}
 		}
 
 		$coreData = $coresToBeUsed | Where-Object { $item.ClassType -eq $_.ClassType }
@@ -309,23 +316,14 @@ function Apply-Interrupt-Affinity-Tweaks {
 # Priority are just what comes before (lower number) the next, as to use the cores available. DevicePriority is what you use for the device.
 # DevicePriority - 0 = Undefined, 1 = Low, 2 = Normal, 3 = High
 $devices = @(
-	[PsObject]@{Class = 'Display'; Priority = 1; Enabled = $true; Description = 'GPU'; isUSB = $false; Limit = $null; DisableMSI = $false; DevicePriority = 0; IsParentDevice = $false; IRQPrioritization = $false},
-	[PsObject]@{Class = 'Mouse'; Priority = 2; Enabled = $true; Description = 'Mouse'; isUSB = $true; Limit = 2048; DisableMSI = $true; DevicePriority = 3; IsParentDevice = $true; IRQPrioritization = $true},
-	[PsObject]@{Class = 'Net'; Priority = 3; Enabled = $true; Description = 'LAN / Ethernet'; isUSB = $false; Limit = 2048; DisableMSI = $false; DevicePriority = 0; IsParentDevice = $false; IRQPrioritization = $true},
-	[PsObject]@{Class = 'Media'; Priority = 4; Enabled = $false; Description = 'Audio'; isUSB = $true; Limit = $null; DisableMSI = $false; DevicePriority = 3; IsParentDevice = $false; IRQPrioritization = $false},
-	[PsObject]@{Class = 'Keyboard'; Priority = 5; Enabled = $false; Description = 'Keyboard'; isUSB = $true; Limit = $null; DisableMSI = $false; DevicePriority = 0; IsParentDevice = $true; IRQPrioritization = $true}
+	[PsObject]@{Class = 'Display'; Priority = 1; Enabled = $true; Description = 'GPU'; isUSB = $false; MSILimit = $null; MSI = $true; DevicePriority = 0; IsParentDevice = $false; IRQPrioritization = $false},
+	[PsObject]@{Class = 'Mouse'; Priority = 2; Enabled = $true; Description = 'Mouse'; isUSB = $true; MSILimit = 2048; MSI = $false; DevicePriority = 3; IsParentDevice = $true; IRQPrioritization = $true},
+	[PsObject]@{Class = 'Net'; Priority = 3; Enabled = $true; Description = 'LAN / Ethernet'; isUSB = $false; MSILimit = 2048; MSI = $true; DevicePriority = 0; IsParentDevice = $false; IRQPrioritization = $true},
+	[PsObject]@{Class = 'Media'; Priority = 4; Enabled = $false; Description = 'Audio'; isUSB = $true; MSILimit = $null; MSI = $true; DevicePriority = 3; IsParentDevice = $false; IRQPrioritization = $false},
+	[PsObject]@{Class = 'Keyboard'; Priority = 5; Enabled = $false; Description = 'Keyboard'; isUSB = $true; MSILimit = 2048; MSI = $true; DevicePriority = 0; IsParentDevice = $true; IRQPrioritization = $true}
 )
 
 # ------------------------------------------------------
-
-<#
-	Refactoring WIP - Recomment to NOT USE TILL THIS MESSAGE ARE REMOVED
-
-	TODO:
-	- Parent from certain devices like Mouse are wrong
-	- Still need to start using the new variables in $device
-	- IsParentDevice might be wrong way to do what it needed to
-#>
 
 $Counts = Get-Processor-Counts
 
