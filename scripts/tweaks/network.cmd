@@ -295,8 +295,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: https://learn.microsoft.com/en-us/windows-hardware/drivers/network/setting-the-number-of-rss-processors
 :: https://learn.microsoft.com/en-us/windows-hardware/drivers/network/introduction-to-receive-side-scaling
 :: Run this powershell command Get-NetAdapterRss, if you want to know whether RSS are working in your machine, if the indirection table are filled, it is, if not, then it's not.
-:: Beware that, to have RSS working, you must have Task Offload enabled, along some other ones related to Offload and Checksum.
-:: If you have an Intel and indirection table are still coming out empty even after all these changes, be sure to remove the intel driver and let it default to microsoft ethernet driver or try an older version of intel.
+:: Beware that, to have RSS working, you must have Task Offload enabled, along some other ones related to Offload and Checksum. This script already has all that is needed, set.
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*NumRSSQueues" /t REG_SZ /d %CoresQty% /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RSS" /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssBaseProcNumber" /t REG_SZ /d %RSSBaseNumber% /f
