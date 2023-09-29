@@ -11,19 +11,15 @@
   I put the same class of devices in the same core, it could be that they are on a different parent, that could be a problem, mainly for USB devices.
 
   Beware: Audio USB and Keyboard might be on the same parent as Mouse, so the parent being the same, it would lose the core assigned of one to the other. Recommended to plug into a different device controller.
-  Check # Priorities to enable/disable and prioritize types of class of devices
 
   Current Choices:
     - Reset all interrupt affinity related options
     - Enable MSI to everything that supports
     - See everything else below on $devices.
 
-  I added option to optionally disable MSI in the Mouse, because in some cases it's an option to consider, but not for other devices imho. Since legacy interrupts may have a simple interrupt implementation leading to lower latency, since the MSI does not have instant processing.
+  In the pre-choice I optionally disabled MSI in the Mouse (parent), because in some cases it's an option to consider, but not for other devices imho. Since legacy interrupts may have a simple interrupt implementation leading to lower latency, since the MSI does not have instant processing.
   I would say for Mouse is worth considering IRQ/Legacy Interrupt vs MSI-X, but not MSI, since MSI-X is also known to have lower latency, but since it's still MSI, it might also not have instant processing, not that the legacy implementation does.
-  It will be based on what works for you. Even LAN you could consider disabling. Though after my latest network.cmd script updates, MSI-X works very well for LAN in my experience.
-
-  I read somewhere that setting a higher limit value than the hard limit of the device could be detrimental to the device performance, I have not confirmed, so, it's just information at this point. A possible way would be just to set the limit to the hard limit of the device and leave as that.
-  This would collaborate with the argument of the a different value overwriting the default hard limit, but again, not confirmed.
+  It will be based on what works for you. MSI-X should work very well for Ethernet, even more so if you are able to get RSS Queues working, network.cmd script should be able to help with that. 
 
   ---------------------------
 
@@ -31,6 +27,9 @@
   https://docs.kernel.org/PCI/msi-howto.html#using-msi
 
   Even though there are cases of driver manufactors setting a higher limit, nothing is proven that they are in fact bypassing that hard limit. But still it could be a possibility as if setting the vector size, but it's not been confirmed.
+
+  I read somewhere that setting a higher limit value than the hard limit of the device could be detrimental to the device performance, I have not confirmed, so, it's just information at this point. A possible way would be just to set the limit to the hard limit of the device and leave as that.
+  This would collaborate with the argument of the a different value overwriting the default hard limit, but again, not confirmed.
 
   ---------------------------
 
@@ -318,8 +317,8 @@ function Apply-Interrupt-Affinity-Tweaks {
 $devices = @(
 	[PsObject]@{Class = 'Display'; Priority = 1; Enabled = $true; Description = 'GPU'; isUSB = $false; MSILimit = $null; MSI = $true; DevicePriority = 0; IsParentDevice = $false; IRQPrioritization = $false},
 	[PsObject]@{Class = 'Mouse'; Priority = 2; Enabled = $true; Description = 'Mouse'; isUSB = $true; MSILimit = 2048; MSI = $false; DevicePriority = 3; IsParentDevice = $true; IRQPrioritization = $true},
-	[PsObject]@{Class = 'Net'; Priority = 3; Enabled = $true; Description = 'LAN / Ethernet'; isUSB = $false; MSILimit = 2048; MSI = $true; DevicePriority = 0; IsParentDevice = $false; IRQPrioritization = $true},
-	[PsObject]@{Class = 'Media'; Priority = 4; Enabled = $false; Description = 'Audio'; isUSB = $true; MSILimit = $null; MSI = $true; DevicePriority = 3; IsParentDevice = $false; IRQPrioritization = $false},
+	[PsObject]@{Class = 'Net'; Priority = 3; Enabled = $true; Description = 'LAN / Ethernet'; isUSB = $false; MSILimit = 2048; MSI = $true; DevicePriority = 3; IsParentDevice = $false; IRQPrioritization = $true},
+	[PsObject]@{Class = 'Media'; Priority = 4; Enabled = $false; Description = 'Audio'; isUSB = $true; MSILimit = $null; MSI = $true; DevicePriority = 0; IsParentDevice = $false; IRQPrioritization = $false},
 	[PsObject]@{Class = 'Keyboard'; Priority = 5; Enabled = $false; Description = 'Keyboard'; isUSB = $true; MSILimit = 2048; MSI = $true; DevicePriority = 0; IsParentDevice = $true; IRQPrioritization = $true}
 )
 
