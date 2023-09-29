@@ -283,7 +283,8 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*IPsecOffloadV2IPv4" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RelaxedOrderingWrite /t REG_SZ /d 1 /f
 
-:: If Auto Negotiation are causing disconnect issues, try set 1GBps full duplex
+:: If Auto Negotiation are causing disconnect issues randomly, try set 1 Gbps Full Duplex
+:: (0) = Auto Negotiation, (4) = 100 Mbps Full Duplex, (6) = 1 Gbps Full Duplex, (2500) = 2.5 Gbps Full Duplex, (5000) = 5 Gbps Full Duplex, (7) = 10 Gbps Full Duplex
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*SpeedDuplex" /t REG_SZ /d 6 /f
 
 :: Lower might process packets faster but could increase CPU usage
