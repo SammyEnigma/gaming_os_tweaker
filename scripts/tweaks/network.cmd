@@ -312,6 +312,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: Only information I could find is that 0 is Static Mode and 1 is Dynamic Mode for RSS. I suppose it prefers Static Mode, and it's more performant too.
 :: Static Mode, the CPU core assignments for processing network traffic remain fixed and do not change dynamically. This means that each network queue is associated with a specific CPU core, and this assignment doesn't fluctuate based on system load or network conditions.
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReceiveScalingMode /t REG_SZ /d 1 /f
+REG DELETE "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReceiveScalingMode /f
 
 :: NDI Tweaks
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\*NumRSSQueues" /v ParamDesc /t REG_SZ /d "Maximum Number of RSS Queues" /f
