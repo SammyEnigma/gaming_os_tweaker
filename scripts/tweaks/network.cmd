@@ -380,8 +380,8 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: NDIS tweaks
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v MaxNumRssCpus /t REG_DWORD /d %CoresQty% /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v MaxNumRssThreads /t REG_DWORD /d %LogicalProcessorsQty% /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v RssBaseCpu /t REG_DWORD /d %RSSBaseNumber% /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v ProcessorAffinityMask /t REG_DWORD /d 55 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v RssBaseCpu /t REG_DWORD /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v smpAffinitized /t REG_DWORD /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v smpProcessorAffinityMask /t REG_DWORD /d 55 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\NDIS\Parameters" /v smpProcessorAffinityMask2 /t REG_DWORD /d 55 /f
