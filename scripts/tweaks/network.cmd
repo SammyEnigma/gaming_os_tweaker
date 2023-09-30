@@ -28,7 +28,6 @@ powershell Disable-NetAdapterIPsecOffload -Name "*" -ErrorAction SilentlyContinu
 powershell Disable-NetAdapterPowerManagement -Name "*" -ErrorAction SilentlyContinue
 powershell Disable-NetAdapterQos -Name "*" -ErrorAction SilentlyContinue
 powershell Disable-NetAdapterUso -Name "*" -ErrorAction SilentlyContinue
-powershell Enable-NetAdapterEncapsulatedPacketTaskOffload -Name "*" -ErrorAction SilentlyContinue
 
 powershell Disable-NetAdapterBinding -Name "*" -ComponentID ms_lldp -ErrorAction SilentlyContinue
 powershell Disable-NetAdapterBinding -Name "*" -ComponentID ms_lltdio -ErrorAction SilentlyContinue
@@ -283,6 +282,10 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*IPsecOffloadV2IPv4" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RelaxedOrderingWrite /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v MaximumWorkingThreads /t REG_SZ /d %LogicalProcessorsQty% /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*EncapsulatedPacketTaskOffload" /t REG_SZ /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "AIMLowestLatency" /t REG_SZ /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*UsoIPv4" /t REG_SZ /d 0 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*UsoIPv6" /t REG_SZ /d 0 /f
 
 :: If Auto Negotiation are causing disconnect issues randomly, try set 1 Gbps Full Duplex
 :: (0) = Auto Negotiation, (4) = 100 Mbps Full Duplex, (6) = 1 Gbps Full Duplex, (2500) = 2.5 Gbps Full Duplex, (5000) = 5 Gbps Full Duplex, (7) = 10 Gbps Full Duplex
