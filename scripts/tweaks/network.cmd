@@ -288,25 +288,21 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v TxAbsIntDelay /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v TxIntDelay /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RxIntDelay /t REG_SZ /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ThreadPoll /t REG_SZ /d 2000 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v MaxCallsToNdisIndicate /t REG_SZ /d 32 /f
 
 :: If Auto Negotiation are causing disconnect issues randomly, try set 1 Gbps Full Duplex
 :: (0) = Auto Negotiation, (4) = 100 Mbps Full Duplex, (6) = 1 Gbps Full Duplex, (2500) = 2.5 Gbps Full Duplex, (5000) = 5 Gbps Full Duplex, (7) = 10 Gbps Full Duplex
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*SpeedDuplex" /t REG_SZ /d 6 /f
 
-:: Lower might process packets faster but could increase CPU usage
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ThreadPoll /t REG_SZ /d 2000 /f
-
-:: Higher value might process packets faster.
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v MaxCallsToNdisIndicate /t REG_SZ /d 32 /f
-
-:: Seems to be TSS (Transmission Side Scaling) where it tries to do the same as RSS, but for outbound traffic.
+:: TSS (Transmission Side Scaling) where it tries to do the same as RSS, but for outbound traffic.
 :: https://doc.dpdk.org/guides/nics/bnxt.html#stateless-offloads - 11.4.3.3
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v EnableTss /t REG_SZ /d 1 /f
 
-:: https://learn.microsoft.com/en-us/windows-hardware/drivers/network/setting-the-number-of-rss-processors
-:: https://learn.microsoft.com/en-us/windows-hardware/drivers/network/introduction-to-receive-side-scaling
 :: Run this powershell command Get-NetAdapterRss, if you want to know whether RSS are working in your machine, if the indirection table are filled, it is, if not, then it's not.
 :: Beware that, to have RSS working, you must have Task Offload enabled, along some other ones related to Offload and Checksum. This script already has all that is needed, set.
+:: https://learn.microsoft.com/en-us/windows-hardware/drivers/network/setting-the-number-of-rss-processors
+:: https://learn.microsoft.com/en-us/windows-hardware/drivers/network/introduction-to-receive-side-scaling
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*NumRSSQueues" /t REG_SZ /d %CoresQty% /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RSS" /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssBaseProcNumber" /t REG_SZ /d %RSSBaseNumber% /f
@@ -319,8 +315,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssOrVmqPreference" /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*RssOnHostVPorts" /t REG_SZ /d 0 /f
 
-:: For whatever reason, this reg was causing RSS Indirection table to not output anything.
-:: Related to RSS Hash
+:: For whatever reason, this reg was causing RSS Indirection table to not output anything. Related to RSS Hash.
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReceiveScalingMode /t REG_SZ /d 1 /f
 REG DELETE "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v ReceiveScalingMode /f
 
