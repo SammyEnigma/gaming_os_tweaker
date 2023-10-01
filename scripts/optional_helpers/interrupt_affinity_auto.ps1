@@ -21,6 +21,8 @@
   I would say for Mouse is worth considering IRQ/Legacy Interrupt vs MSI-X, but not MSI, since MSI-X is also known to have lower latency, but since it's still MSI, it might also not have instant processing, not that the legacy implementation does.
   It will be based on what works for you. MSI-X should work very well for Ethernet, even more so if you are able to get RSS Queues working, network.cmd script should be able to help with that. 
 
+  https://electronics.stackexchange.com/a/76878 
+
   ---------------------------
 
   If a device has both MSI and MSI-X, MSI-X will take precedence and hard limit is the size of the vector. Regardless of the value set, it will be capped on that limit, this is based on a documentation.
