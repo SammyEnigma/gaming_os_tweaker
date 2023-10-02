@@ -23,6 +23,10 @@
 
   https://electronics.stackexchange.com/a/76878 
 
+  I suppose if there were a Polling alternative to MSI, it could be even better, as it could able to process faster than interrupts, leading to lower latency, since MSI are not instant processing, if you check the url above this.
+  DevicePriority to High seems to help in lowering latency (even if minor) as it take priority in processing.
+  https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/vmw-tuning-latency-sensitive-workloads-white-paper.pdf - Mid Page 8
+	
   ---------------------------
 
   If a device has both MSI and MSI-X, MSI-X will take precedence and hard limit is the size of the vector. Regardless of the value set, it will be capped on that limit, this is based on a documentation.
