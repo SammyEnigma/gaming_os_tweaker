@@ -299,6 +299,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 
 :: To enable NDIS Poll Mode, set RecvCompletionMethod to 4 and SendCompletionMethod to 2. But will be (optional) for now.
 :: Both are already using the most optimal way as to process faster, but this is a recent addition to NDIS 6.85.
+:: You can check the current NDIS version from your ethernet adapter by using the following command, if 6.85+, then it's supported. Get-NetAdapter | Select -Expand NdisVersion
 :: Everything that is in Poll mode instead of Interrupts should have a faster processing.
 :: https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/vmw-tuning-latency-sensitive-workloads-white-paper.pdf - Mid Page 8
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RecvCompletionMethod /t REG_SZ /d 0 /f
