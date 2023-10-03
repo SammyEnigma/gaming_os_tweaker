@@ -41,6 +41,9 @@ Add-MpPreference -ExclusionPath "$env:SystemRoot\System32\Configuration\Configur
 Add-MpPreference -ExclusionPath "${env:ProgramFiles(x86)}\Steam\"
 Add-MpPreference -ExclusionPath "${env:ProgramFiles(x86)}\Epic Games\"
 Add-MpPreference -ExclusionPath "${env:ProgramFiles(x86)}\EA Games\"
+Add-MpPreference -ExclusionPath "${env:ProgramFiles}\Steam\"
+Add-MpPreference -ExclusionPath "${env:ProgramFiles}\Epic Games\"
+Add-MpPreference -ExclusionPath "${env:ProgramFiles}\EA Games\"
 
 Add-MpPreference -ExclusionProcess "${env:ProgramFiles(x86)}\Windows Kits\10\Windows Performance Toolkit\WPRUI.exe"
 Add-MpPreference -ExclusionProcess "${env:ProgramFiles(x86)}\Windows Kits\10\Windows Performance Toolkit\wpa.exe"
