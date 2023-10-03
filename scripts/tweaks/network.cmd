@@ -11,6 +11,9 @@ set /a MTU=1400
 :: Set to a core value, non-zero
 set /a RSSBaseNumber=2
 
+:: Check for NDIS Poll Mode support
+for /f %%b in ('powershell -noprofile -c "Get-NetAdapter | Select -ExpandProperty NdisVersion | %% { if ($_ -ge 6.85) { return 'SUPPORTED' } else { return 'NOT_SUPPORTED' }; }"') do set "NDIS_POLL_SUPPORTED=%%b"
+
 :: =============================================================================================================================================================================================
 
 :: Optmize network card settings
@@ -297,16 +300,18 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: (0) = Auto Negotiation, (4) = 100 Mbps Full Duplex, (6) = 1 Gbps Full Duplex, (2500) = 2.5 Gbps Full Duplex, (5000) = 5 Gbps Full Duplex, (7) = 10 Gbps Full Duplex
 :: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v "*SpeedDuplex" /t REG_SZ /d 6 /f
 
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RecvCompletionMethod /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v SendCompletionMethod /t REG_SZ /d 1 /f
-:: (Optional) NDIS Poll Mode - https://learn.microsoft.com/en-us/windows-hardware/drivers/network/ndis-poll-mode
-:: Both are already using the most optimal way as to process faster, but this is a recent addition to NDIS 6.85.
-:: You can check the current NDIS version from your ethernet adapter by using the following command, if 6.85+, then it's supported.
-:: Get-NetAdapter | Select -Expand NdisVersion
-:: Everything that is in Poll mode instead of Interrupts should have a faster processing.
+:: NDIS Poll Mode, if supported - https://learn.microsoft.com/en-us/windows-hardware/drivers/network/ndis-poll-mode
+:: Recently added to NDIS 6.85. Though, both are already using the most optimal way as to process faster. 
+:: But, everything that is in Poll mode instead of Interrupts should have a faster processing.
 :: https://www.vmware.com/content/dam/digitalmarketing/vmware/en/pdf/techpaper/vmw-tuning-latency-sensitive-workloads-white-paper.pdf - Mid Page 8
-:: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RecvCompletionMethod /t REG_SZ /d 4 /f
-:: REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v SendCompletionMethod /t REG_SZ /d 2 /f
+if %NDIS_POLL_SUPPORTED%==SUPPORTED (
+    REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RecvCompletionMethod /t REG_SZ /d 4 /f
+    REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v SendCompletionMethod /t REG_SZ /d 2 /f
+)
+if %NDIS_POLL_SUPPORTED%==NOT_SUPPORTED (
+    REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RecvCompletionMethod /t REG_SZ /d 0 /f
+    REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v SendCompletionMethod /t REG_SZ /d 1 /f
+)
 
 :: TSS (Transmission Side Scaling) where it tries to do the same as RSS, but for outbound traffic.
 :: https://doc.dpdk.org/guides/nics/bnxt.html#stateless-offloads - 11.4.3.3
