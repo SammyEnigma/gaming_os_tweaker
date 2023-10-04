@@ -313,9 +313,10 @@ if %NDIS_POLL_SUPPORTED%==NOT_SUPPORTED (
     REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v SendCompletionMethod /t REG_SZ /d 1 /f
 )
 
-:: 0 means no delay in transmitting or receiving packets, but it may cause random very fast packet loss. If the solution below are not enough, you can increase both by 1 and try again and till it stops. 
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v TxIntDelay /t REG_SZ /d 0 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RxIntDelay /t REG_SZ /d 0 /f
+:: 0 means no delay in transmitting or receiving packets, but it may cause random very fast packet loss. If the solution below are not enough, you can increase both by 1 and try again and till it stops.
+:: I will leave at 1, because in more tries, 1 help have almost no connection warnings. While 0 had more. It could work for other games or people though.
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v TxIntDelay /t REG_SZ /d 1 /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RxIntDelay /t REG_SZ /d 1 /f
 :: Increase the size of an Ethernet devices ring buffers if the packet drop rate causes applications to report a loss of data, timeouts, or other issues.
 :: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/tuning-the-network-performance_monitoring-and-managing-system-status-and-performance
 :: A long buffer size leads to low latency. However, low latency comes at the cost of throughput.
