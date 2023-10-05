@@ -1,4 +1,4 @@
-# GeoFence are just firewall UDP IP blocking of servers / regions you do not want to be connected to. That can solve problems in games that do connect you outside your own region in which some cases are bad, since you are put into high ping servers.
+# GeoFence are just firewall IP blocking of servers / regions you do not want to be connected to. That can solve problems in games that do connect you outside your own region in which some cases are bad, since you are put into high ping servers.
 
 # It can work in any game as long as you know the correct .exe location and the ips / ip ranges you want to block. In a multiplayer game, you can usually find the IPs in the support / wiki section, but it can be outdated/incomplete information, therefore some you might have to get yourself directly or look elsewhere.
 
@@ -11,7 +11,7 @@
 # https://us.battle.net/support/en/article/7871
 
 # In case you are using Windows Firewall, use this powershell script.
-# If not and you are using other Firewall solutions, you have to do it yourself, but same concept, UDP IP blocking Inbound and Outbound to Remote Addresses.
+# If not and you are using other Firewall solutions, you have to do it yourself, but same concept, IP blocking Inbound and Outbound to Remote Addresses.
 
 # You can add single ips or ip range. You can separate each ip or range with comma. To specify a range, you use -, as in 0.0.0.0-255.255.255.255. To update ips if that is ever needed, just change the ips and re-execute the whole script.
 # Make sure that is the game .exe, not the launcher .exe, sometimes they are in different folders.
@@ -25,8 +25,8 @@ $GameExeSplit = $GameExeLocation.Split("\");
 $RuleName = "$($GameExeSplit[$GameExeSplit.Length - 1])-GeoFence";
 Remove-NetFirewallRule -DisplayName "$RuleName-Out" -ErrorAction SilentlyContinue;
 Remove-NetFirewallRule -DisplayName "$RuleName-In" -ErrorAction SilentlyContinue;
-New-NetFirewallRule -DisplayName "$RuleName-Out" -Direction Outbound -Protocol Udp -Action Block -Program $GameExeLocation -RemoteAddress $IPs;
-New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Udp -Action Block -Program $GameExeLocation -RemoteAddress $IPs;
+New-NetFirewallRule -DisplayName "$RuleName-Out" -Direction Outbound -Protocol Any -Action Block -Program $GameExeLocation -RemoteAddress $IPs;
+New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any -Action Block -Program $GameExeLocation -RemoteAddress $IPs;
 
 # In cases like Overwatch, if the IPs from the support/wiki are not enough, and you are still being put in high ping servers, you can press Ctrl+Shift+N and you will see the stats, the IP should be above, you can then use the first 2 decimals and build a range yourself. Use .0.0 in the from and .255.255 in the to. e.g., 35.228.0.0-35.228.255.255
 
