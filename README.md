@@ -145,7 +145,6 @@ It doesnt mean they arent trustworthy, I don't know them, it just means it's not
   - <https://eternallybored.org/misc/pciutils/>
 
 - Places that could be informative
-  - <https://www.youtube.com/watch?v=6CB8P0-hJRQ>
   - <https://www.youtube.com/@Savitarax/videos>
   - <https://github.com/BoringBoredom/PC-Optimization-Hub>
   - <https://github.com/djdallmann/GamingPCSetup>
