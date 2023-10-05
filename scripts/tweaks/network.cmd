@@ -314,14 +314,13 @@ if %NDIS_POLL_SUPPORTED%==NOT_SUPPORTED (
 )
 
 :: 0 means no delay in transmitting or receiving packets, but it may cause random very fast packet loss. If the solution below are not enough, you can increase both by 1 and try again and till it stops.
-:: I will leave at 1, because in more tries, 1 help have almost no connection warnings. While 0 had more. It could work for other games or people though.
+:: I will leave at 1, because in more tries, 1 helped have almost no connection warnings. While 0 had plenty. It could be different for others though.
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v TxIntDelay /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v RxIntDelay /t REG_SZ /d 1 /f
 :: Increase the size of an Ethernet devices ring buffers if the packet drop rate causes applications to report a loss of data, timeouts, or other issues.
 :: https://access.redhat.com/documentation/en-us/red_hat_enterprise_linux/8/html/monitoring_and_managing_system_status_and_performance/tuning-the-network-performance_monitoring-and-managing-system-status-and-performance
 :: A long buffer size leads to low latency. However, low latency comes at the cost of throughput.
 :: https://docs.informatica.com/integration-cloud/data-integration-connectors/h2l/1387-performance-tuning-guidelines-for-microsoft-azure-data-lake/performance-tuning-guidelines-for-microsoft-azure-data-lake-stor/performance-tuning-parameters/tune-the-hardware/nic-card-ring-buffer-size.html
-:: Values reference: https://github.com/fl64/packer-baseboxes/blob/master/windows/common/vmware/drivers/vmxnet3/vmxnet3ndis6.inf
 :: However high buffer may also be a cause of delays, so I might just leave double the default value.
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v EnableAdaptiveRing /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v MaxRxRing1Length /t REG_SZ /d 1024 /f
@@ -331,7 +330,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v NumRxBuffersLarge /t REG_SZ /d 2048 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v NumTxBuffers /t REG_SZ /d 128 /f
 
-:: TSS (Transmission Side Scaling) where it tries to do the same as RSS, but for outbound traffic.
+:: TSS (Transmission Side Scaling) where it tries to do the same as RSS, but for outbound traffic. Where RSS are for inbound traffic.
 :: https://doc.dpdk.org/guides/nics/bnxt.html#stateless-offloads - 11.4.3.3
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v EnableTss /t REG_SZ /d 1 /f
 
@@ -483,7 +482,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\NumRxBuffersLarge\Enum" /v 3072 /t REG_SZ /d 3072 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\NumRxBuffersLarge\Enum" /v 4096 /t REG_SZ /d 4096 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\NumRxBuffersLarge\Enum" /v 8192 /t REG_SZ /d 8192 /f
-REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\EnableAdaptiveRing" /v ParamDesc /t REG_SZ /d "Enable Adaptive RX Ring Sizing" /f
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\EnableAdaptiveRing" /v ParamDesc /t REG_SZ /d "Adaptive RX Ring Sizing" /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\EnableAdaptiveRing" /v default /t REG_SZ /d 1 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\EnableAdaptiveRing" /v type /t REG_SZ /d enum /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\EnableAdaptiveRing" /v Optional /t REG_SZ /d 0 /f
