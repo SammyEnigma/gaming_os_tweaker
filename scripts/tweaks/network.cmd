@@ -323,6 +323,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: https://docs.informatica.com/integration-cloud/data-integration-connectors/h2l/1387-performance-tuning-guidelines-for-microsoft-azure-data-lake/performance-tuning-guidelines-for-microsoft-azure-data-lake-stor/performance-tuning-parameters/tune-the-hardware/nic-card-ring-buffer-size.html
 :: However high buffer may also be a cause of delays, so I might just leave double the default value.
 :: Just as the NDI comments below, I will skip this portion for now, but leave it here for information and for others to test.
+:: I would say that this probably need better tweaking, testing and understanding of side effects.
 goto skip_ring_tweaks
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v EnableAdaptiveRing /t REG_SZ /d 0 /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%" /v MaxRxRing1Length /t REG_SZ /d 1024 /f
