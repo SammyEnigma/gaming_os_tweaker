@@ -412,6 +412,8 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\*TransmitBuffers" /v type /t REG_SZ /d int /f
 :: I dont know if started taking effect after adding these, but I noticed some ping spikes that I never seen before. Maybe to prevent connection warns, I dont know. 
 :: I will comment/skip this, and leave for the information and maybe others can test too.
+:: https://medium.com/coccoc-engineering-blog/linux-network-ring-buffers-cea7ead0b8e8
+:: Long queue can give you high throughput but can cause a super high latency outliers. Short queue can be used to optimize latency, but it comes with the risk of dropping packets when there are too much too handle.
 goto skip_ring_ndi_regs
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\RxThrottle" /v ParamDesc /t REG_SZ /d "RX Throttle" /f
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\Ndi\Params\RxThrottle" /v default /t REG_SZ /d 0 /f
