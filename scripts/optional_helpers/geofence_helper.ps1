@@ -43,8 +43,7 @@ New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any
 
 # If you are using simplewall, currently, the only way is export all your profile as by going to File > Export > profile.xml
 # I can generate based on lists of IPs here, the rule that you would add inside <rules_custom></rules_custom> tag. Once you had added there, you only need to import everything back, not partially, entirely, otherwise you lose other config / rules you might have added previously. Through File > Import.
-# (Beware) just after finishing this, I noticed that simplewall are limiting the amount of characters to block (so only a small amount of ips allowed), bad implementation as far as I know. So this is invalid till they fix. 
-# What it can also be done, is create multiple rules of the same path. Each containing ips up to 256 characters as long as its the complete address. In OW2 case, it would go about 32 rules item.
+# A simple implementation were not possible due to simplewall current limit of 256 characters per rule.
 
 $FileName = "Overwatch2_IPs.txt"
 $GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$FileName"
@@ -54,9 +53,12 @@ $Content = Get-Content -path $GeofenceListPath
 # I built this to myself mostly, to support in a most developed way, it would require something like a website to support multiple types of firewall and games, while automating as much as possible.
 $RegionToConnect = "GBR1"
 $GamePath = "C:\program files (x86)\steam\steamapps\common\overwatch\overwatch.exe"
-$BlockedIPs = ""
 $IsFromRegionToConnect = $false
-ForEach ($Line in $Content) {
+$BlockedIPs = ""
+$RulesItems = @();
+$TempEndStorage = ""
+for ($i = 0; $i -lt $Content.Length; $i++) {
+    $Line = $Content[$i]
     $IsLineTitle = $Line.StartsWith('#')
     if ($IsLineTitle) {
         $Region = $Line.Trim().Split('-')[2].Trim()
@@ -68,12 +70,29 @@ ForEach ($Line in $Content) {
         continue
     }
     if ($IsFromRegionToConnect -eq $false) {
-        $BlockedIPs += $Line.Trim() + ';'
+		$IP = $Line.Trim() + ';'
+        if ($IP.Length -le 1) {
+            continue
+        }
+		$TempItem = $BlockedIPs + $IP
+		if ($TempItem.Length -lt 256) {
+			$BlockedIPs += $IP
+		} else {
+			$RulesItems += $BlockedIPs
+			$BlockedIPs = ""
+            $TempEndStorage = ""
+			$BlockedIPs += $IP
+		}
+        $TempEndStorage += $IP
     }
 }
 
-$BlockedIPs = $BlockedIPs.Remove($BlockedIPs.Length - 1, 1)
+if ($TempEndStorage.Length -gt 0) {
+    $RulesItems += $TempEndStorage
+}
 
 [Environment]::NewLine
-Write-Host "<item name=""Overwatch2-GeoFence"" rule=""$BlockedIPs"" dir=""2"" apps=""$GamePath"" is_block=""true"" is_enabled=""true""/>"
+for ($i = 0; $i -lt $RulesItems.Length; $i++) {
+    Write-Host "<item name=""Overwatch2-GeoFence-$i"" rule=""$($RulesItems[$i])"" dir=""2"" apps=""$GamePath"" is_block=""true"" is_enabled=""true""/>"
+}
 [Environment]::NewLine
