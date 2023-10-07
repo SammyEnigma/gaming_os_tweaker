@@ -584,8 +584,6 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: Moderate
 :: MaxRxBuffer
 :: SleepSpeed
-:: SingleMsixNum
-:: MultiMsixNum
 :: IntDelayEnable
 :: TxDescriptors
 :: RxDescriptors
