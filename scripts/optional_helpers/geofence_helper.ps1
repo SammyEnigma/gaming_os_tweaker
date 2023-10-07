@@ -41,18 +41,21 @@ New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any
 # --------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------
 
-# If you are using simplewall, currently, the only way is export all your profile as by going to File > Export > profile.xml
-# I can generate based on lists of IPs here, the rule that you would add inside <rules_custom></rules_custom> tag. Once you had added there, you only need to import everything back, not partially, entirely, otherwise you lose other config / rules you might have added previously. Through File > Import.
+# If you are using simplewall, currently, the only way is export your profile, by going to File > Export > profile.xml
+# I can generate rules based on lists of IPs, the rule that you would add inside <rules_custom></rules_custom> tag. 
+# Once you had added there, you only need to import, not partially, but entirely, because it will be the whole config, you lose what you had there, that is overwritting everything. Through File > Import > profile.xml
 # A simple implementation were not possible due to simplewall current limit of 256 characters per rule.
+# This is a very simple method of doing this, but choose only the region you want to connect to.
+# I built this to myself mostly, but to support most, in a complete way, it would require something like a website, to support multiple types of firewall and games, while automating as much as possible.
 
-$FileName = "Overwatch2_IPs.txt"
-$GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$FileName"
+$GeoFence_IPs_FileName = "Overwatch2_IPs.txt"
+$GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$GeoFence_IPs_FileName"
 $Content = Get-Content -path $GeofenceListPath
 
-# This is a very simple method of doing this, but choose only the region you want to connect to.
-# I built this to myself mostly, to support in a most developed way, it would require something like a website to support multiple types of firewall and games, while automating as much as possible.
+# Only alter the 2 below
 $RegionToConnect = "GBR1"
 $GamePath = "C:\program files (x86)\steam\steamapps\common\overwatch\overwatch.exe"
+
 $IsFromRegionToConnect = $false
 $BlockedIPs = ""
 $RulesItems = @();
@@ -83,7 +86,7 @@ for ($i = 0; $i -lt $Content.Length; $i++) {
             $TempEndStorage = ""
 			$BlockedIPs += $IP
 		}
-        $TempEndStorage += $IP
+    	$TempEndStorage += $IP
     }
 }
 
