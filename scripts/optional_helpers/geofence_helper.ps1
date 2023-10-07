@@ -37,3 +37,43 @@ New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any
 # There are paid solutions, I would say that they are NOT worth. Since they are probably just doing this, but in a nicer UI.
 # Also, do not be fooled by VPN, this is not VPN and VPN will not GeoBlock anything unless they are specifically doing it per game inside their own firewall. Make no sense, since you can easily do it yourself.
 # VPN will only put you as if you were in another location, but that is even worse, latency wise, because if you are being put in different regions servers, that will happen the same to the VPN IP, it will be put to a different server from the VPN location instead.
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# If you are using simplewall, currently, the only way is export all your profile as by going to File > Export > profile.xml
+# I can generate based on lists of IPs here, the rule that you would add inside <rules_custom></rules_custom> tag. Once you had added there, you only need to import everything back, not partially, entirely, otherwise you lose other config / rules you might have added previously. Through File > Import.
+# (Beware) just after finishing this, I noticed that simplewall are limiting the amount of characters to block (so only a small amount of ips allowed), bad implementation as far as I know. So this is invalid till they fix. 
+# What it can also be done, is create multiple rules of the same path. Each containing ips up to 256 characters as long as its the complete address. In OW2 case, it would go about 32 rules item.
+
+$FileName = "Overwatch2_IPs.txt"
+$GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$FileName"
+$Content = Get-Content -path $GeofenceListPath
+
+# This is a very simple method of doing this, but choose only the region you want to connect to.
+# I built this to myself mostly, to support in a most developed way, it would require something like a website to support multiple types of firewall and games, while automating as much as possible.
+$RegionToConnect = "GBR1"
+$GamePath = "C:\program files (x86)\steam\steamapps\common\overwatch\overwatch.exe"
+$BlockedIPs = ""
+$IsFromRegionToConnect = $false
+ForEach ($Line in $Content) {
+    $IsLineTitle = $Line.StartsWith('#')
+    if ($IsLineTitle) {
+        $Region = $Line.Trim().Split('-')[2].Trim()
+        if ($Region -eq $RegionToConnect) {
+            $IsFromRegionToConnect = $true
+        } else {
+            $IsFromRegionToConnect = $false
+        }
+        continue
+    }
+    if ($IsFromRegionToConnect -eq $false) {
+        $BlockedIPs += $Line.Trim() + ';'
+    }
+}
+
+$BlockedIPs = $BlockedIPs.Remove($BlockedIPs.Length - 1, 1)
+
+[Environment]::NewLine
+Write-Host "<item name=""Overwatch2-GeoFence"" rule=""$BlockedIPs"" dir=""2"" apps=""$GamePath"" is_block=""true"" is_enabled=""true""/>"
+[Environment]::NewLine
