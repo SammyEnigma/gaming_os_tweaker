@@ -589,6 +589,8 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEV
 :: IntDelayEnable
 :: TxDescriptors
 :: RxDescriptors
+:: NumRxDescriptors
+:: NumTxDescriptors
 
 :: PROSetNdi tweaks
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\%ETHERNET_DEVICE_CLASS_GUID_WITH_KEY%\PROSetNdi" /v EnableLLI /t REG_SZ /d 1 /f
