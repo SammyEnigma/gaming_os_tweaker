@@ -110,12 +110,12 @@ for ($i = 0; $i -lt $RulesItems.Length; $i++) {
 [Environment]::NewLine
 
 $WindowsFirewallBlockedIPs = $WindowsFirewallBlockedIPs.Remove($WindowsFirewallBlockedIPs.Length - 1, 1)
+$GameExeSplit = $GamePath.Split("\");
+$RuleName = "$($GameExeSplit[$GameExeSplit.Length - 1])-GeoFence";
 
 [Environment]::NewLine
 Write-Host "Windows Firewall"
 [Environment]::NewLine
-$GameExeSplit = $GamePath.Split("\");
-$RuleName = "$($GameExeSplit[$GameExeSplit.Length - 1])-GeoFence";
 Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-Out"" -ErrorAction SilentlyContinue;"
 Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-In"" -ErrorAction SilentlyContinue;"
 Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-Out"" -Direction Outbound -Protocol Any -Action Block -Program ""$GamePath"" -RemoteAddress $WindowsFirewallBlockedIPs"
