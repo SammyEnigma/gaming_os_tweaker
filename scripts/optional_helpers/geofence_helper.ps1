@@ -45,16 +45,15 @@ New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any
 # I can generate rules based on lists of IPs, the rule that you would add inside <rules_custom></rules_custom> tag. 
 # Once you had added there, you only need to import, not partially, but entirely, because it will be the whole config, you lose what you had there, that is overwritting everything. Through File > Import > profile.xml
 # A simple implementation were not possible due to simplewall current limit of 256 characters per rule.
-# This is a very simple method of doing this, but choose only the region you want to connect to.
 # I built this to myself mostly, but to support most, in a complete way, it would require something like a website, to support multiple types of firewall and games, while automating as much as possible.
 
-$GeoFence_IPs_FileName = "Overwatch2_IPs.txt"
-$GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$GeoFence_IPs_FileName"
-$Content = Get-Content -path $GeofenceListPath
-
-# Only alter the 2 below
+# Only alter the 3 below
+$GeoFence_IPs_FileName = "Overwatch2" # https://github.com/dougg0k/gaming_os_tweaker/tree/main/scripts/configs/geofence
 $RegionToConnect = "GBR1"
 $GamePath = "C:\program files (x86)\steam\steamapps\common\overwatch\overwatch.exe"
+
+$GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$($GeoFence_IPs_FileName)_IPs.txt"
+$Content = Get-Content -path $GeofenceListPath
 
 $IsFromRegionToConnect = $false
 $BlockedIPs = ""
