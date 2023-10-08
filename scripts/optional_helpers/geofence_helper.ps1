@@ -99,3 +99,47 @@ for ($i = 0; $i -lt $RulesItems.Length; $i++) {
     Write-Host "<item name=""Overwatch2-GeoFence-$i"" rule=""$($RulesItems[$i])"" dir=""2"" apps=""$GamePath"" is_block=""true"" is_enabled=""true""/>"
 }
 [Environment]::NewLine
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+
+# Windows Firewall.
+
+$FileName = "Overwatch2_IPs.txt"
+$GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$FileName"
+$Content = Get-Content -path $GeofenceListPath
+
+$RegionToConnect = "GBR1"
+$GamePath = "C:\program files (x86)\steam\steamapps\common\overwatch\overwatch.exe"
+$IsFromRegionToConnect = $false
+$BlockedIPs = "";
+for ($i = 0; $i -lt $Content.Length; $i++) {
+    $Line = $Content[$i]
+    $IsLineTitle = $Line.StartsWith('#')
+    if ($IsLineTitle) {
+        $Region = $Line.Trim().Split('-')[2].Trim()
+        if ($Region -eq $RegionToConnect) {
+            $IsFromRegionToConnect = $true
+        } else {
+            $IsFromRegionToConnect = $false
+        }
+        continue
+    }
+    if ($IsFromRegionToConnect -eq $false) {
+	$IP = $Line.Trim() + ','
+        if ($IP.Length -le 1) {
+            continue
+        }
+	$BlockedIPs += $IP
+    }
+}
+$BlockedIPs = $BlockedIPs.Remove($BlockedIPs.Length - 1, 1)
+
+[Environment]::NewLine
+$GameExeSplit = $GamePath.Split("\");
+$RuleName = "$($GameExeSplit[$GameExeSplit.Length - 1])-GeoFence";
+Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-Out"" -ErrorAction SilentlyContinue;"
+Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-In"" -ErrorAction SilentlyContinue;"
+Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-Out"" -Direction Outbound -Protocol Any -Action Block -Program ""$GamePath"" -RemoteAddress $BlockedIPs"
+Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-In"" -Direction Inbound -Protocol Any -Action Block -Program ""$GamePath"" -RemoteAddress $BlockedIPs"
+[Environment]::NewLine
