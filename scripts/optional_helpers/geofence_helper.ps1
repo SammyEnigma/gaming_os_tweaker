@@ -8,7 +8,7 @@
 # https://cyanlabs.net/free-multi-sbmm-disabler/
 
 # Others you have to get the ips yourself.
-# https://us.battle.net/support/en/article/7871
+# https://us.battle.net/support/en/article/7871 - https://github.com/foryVERX/Overwatch-Server-Selector
 
 # In case you are using Windows Firewall, use this powershell script.
 # If not and you are using other Firewall solutions, you have to do it yourself, but same concept, IP blocking Inbound and Outbound to Remote Addresses.
