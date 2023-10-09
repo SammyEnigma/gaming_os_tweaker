@@ -118,6 +118,7 @@ Write-Host "Windows Firewall"
 Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-Out"" -ErrorAction SilentlyContinue;"
 Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-In"" -ErrorAction SilentlyContinue;"
 Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-Out"" -Direction Outbound -Protocol Any -Action Block -Program ""$GamePath"" -RemoteAddress $WindowsFirewallBlockedIPs"
-Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-In"" -Direction Inbound -Protocol Any -Action Block -Program ""$GamePath"" -RemoteAddress $WindowsFirewallBlockedIPs"
+Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-ICMP"" -Direction Inbound -Action Allow -Protocol ICMPv4 -IcmpType Any -Program ""$GamePath"" -RemoteAddress $WindowsFirewallBlockedIPs"
 [Environment]::NewLine
 
+cmd /c pause
