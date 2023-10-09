@@ -140,6 +140,16 @@ REG ADD "HKEY_LOCAL_MACHINE\System\CurrentControlSet\Control\Session Manager" /v
 :: Disable Intel TSX mitigation
 REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\Kernel" /v DisableTsx /t REG_DWORD /d 0 /f
 
-:: Improve Windows firewall settings
+:: Disable internet connection sharing
+REG ADD "HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Microsoft\Windows\Network Connections" /v NC_ShowSharedAccessUI /t REG_DWORD /d 0 /f
+
+:: Fix DNS vuln
+REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DNS\Parameters" /v TcpReceivePacketSize /t REG_DWORD /d 0xFF00 /f
+
+:: Improve Windows firewall settings - Recommended to use https://www.binisoft.org/wfc as enhancer of Windows Firewall.
 netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
 netsh advfirewall firewall delete rule all
+netsh advfirewall set allprofiles settings unicastresponsetomulticast disabled
+netsh advfirewall set currentprofile logging filename %systemroot%\system32\LogFiles\Firewall\pfirewall.log
+netsh advfirewall set currentprofile logging maxfilesize 4096
+netsh advfirewall set currentprofile logging droppedconnections enable
