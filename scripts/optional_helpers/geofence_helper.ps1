@@ -46,6 +46,7 @@ New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any
 # Once you had added there, you only need to import, not partially, but entirely, because it will be the whole config, you lose what you had there, that is overwritting everything. Through File > Import > profile.xml
 # A simple implementation were not possible due to simplewall current limit of 256 characters per rule.
 # I built this to myself mostly, but to support most, in a complete way, it would require something like a website, to support multiple types of firewall and games, while automating as much as possible.
+# I had a working fix by allowing those IPs to be pinged back, then it was able to better redirect to other servers automatically. Still need to do that on the simplewall, but later.
 
 # Only alter the 3 below
 $GeoFence_IPs_FileName = "Overwatch2" # https://github.com/dougg0k/gaming_os_tweaker/tree/main/scripts/configs/geofence
@@ -117,7 +118,9 @@ Write-Host "Windows Firewall"
 [Environment]::NewLine
 Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-Out"" -ErrorAction SilentlyContinue;"
 Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-In"" -ErrorAction SilentlyContinue;"
+Write-Host "Remove-NetFirewallRule -DisplayName ""$RuleName-ICMP"" -ErrorAction SilentlyContinue;"
 Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-Out"" -Direction Outbound -Protocol Any -Action Block -Program ""$GamePath"" -RemoteAddress $WindowsFirewallBlockedIPs"
+Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-In"" -Direction Inbound -Protocol Any -Action Block -Program ""$GamePath"" -RemoteAddress $WindowsFirewallBlockedIPs"
 Write-Host "New-NetFirewallRule -DisplayName ""$RuleName-ICMP"" -Direction Inbound -Action Allow -Protocol ICMPv4 -IcmpType Any -Program ""$GamePath"" -RemoteAddress $WindowsFirewallBlockedIPs"
 [Environment]::NewLine
 
