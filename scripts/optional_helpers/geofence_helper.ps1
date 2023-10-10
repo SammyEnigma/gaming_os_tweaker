@@ -1,3 +1,10 @@
+# WIP (not done)
+# It had some good progress, but there are still bugs where sometimes the connection just fail instead of being redirected to a working server. You may get temporarily suspended because of it in competitive, quick play and training will just fail to connect in OW2 that is.
+# It seem that you get a pool of ips as you connect, they try and get blocked a bunch of them, if none are from which you want to connect, it will fail. At least is what it seems till proved otherwise.
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # GeoFence are just firewall IP blocking of servers / regions you do not want to be connected to. That can solve problems in games that do connect you outside your own region in which some cases are bad, since you are put into high ping servers.
 
 # It can work in any game as long as you know the correct .exe location and the ips / ip ranges you want to block. In a multiplayer game, you can usually find the IPs in the support / wiki section, but it can be outdated/incomplete information, therefore some you might have to get yourself directly or look elsewhere.
@@ -17,6 +24,7 @@
 # Make sure that is the game .exe, not the launcher .exe, sometimes they are in different folders.
 # Remove the example IPs from @() and put the IP addresses you want to, separating them with comma and inside double quotes.
 
+<#
 # You only need to alter $GameExeLocation and $IPs
 $GameExeLocation = "C:\...\YOUR_GAME.exe";
 $IPs = @("123.1.32.2", "1.2.0.0-1.2.255.255");
@@ -27,6 +35,7 @@ Remove-NetFirewallRule -DisplayName "$RuleName-Out" -ErrorAction SilentlyContinu
 Remove-NetFirewallRule -DisplayName "$RuleName-In" -ErrorAction SilentlyContinue;
 New-NetFirewallRule -DisplayName "$RuleName-Out" -Direction Outbound -Protocol Any -Action Block -Program $GameExeLocation -RemoteAddress $IPs;
 New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any -Action Block -Program $GameExeLocation -RemoteAddress $IPs;
+#>
 
 # In cases like Overwatch, if the IPs from the support/wiki are not enough, and you are still being put in high ping servers, you can press Ctrl+Shift+N and you will see the stats, the IP should be above, you can then use the first 2 decimals and build a range yourself. Use .0.0 in the from and .255.255 in the to. e.g., 35.228.0.0-35.228.255.255
 
@@ -41,11 +50,41 @@ New-NetFirewallRule -DisplayName "$RuleName-In" -Direction Inbound -Protocol Any
 # --------------------------------------------------------------------------------------------------------------------------------------------------------
 # --------------------------------------------------------------------------------------------------------------------------------------------------------
 
+function Get-Broadcast ($addressAndCidr) {
+    function New-IPv4toBin ($ipv4) {
+        $BinNum = $ipv4 -split '\.' | ForEach-Object {[System.Convert]::ToString($_,2).PadLeft(8,'0')}
+        return $binNum -join ""
+    }
+    $addressAndCidr = $addressAndCidr.Split("/")
+    $addressInBin = (New-IPv4toBin $addressAndCidr[0]).ToCharArray()
+    for ($i=0;$i -lt $addressInBin.length;$i++) {
+        if ($i -ge $addressAndCidr[1]){
+            $addressInBin[$i] = "1"
+        } 
+    }
+    [string[]]$addressInInt32 = @()
+    for ($i = 0;$i -lt $addressInBin.length;$i++) {
+        $partAddressInBin += $addressInBin[$i] 
+        if (($i+1)%8 -eq 0) {
+            $partAddressInBin = $partAddressInBin -join ""
+            $addressInInt32 += [Convert]::ToInt32($partAddressInBin -join "",2)
+            $partAddressInBin = ""
+        }
+    }
+    $addressInInt32 = $addressInInt32 -join "."
+    return $addressInInt32
+}
+
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+# --------------------------------------------------------------------------------------------------------------------------------------------------------
+
 # If you are using simplewall, currently, the only way is export your profile, by going to File > Export > profile.xml
 # I can generate rules based on lists of IPs, the rule that you would add inside <rules_custom></rules_custom> tag. 
 # Once you had added there, you only need to import, not partially, but entirely, because it will be the whole config, you lose what you had there, that is overwritting everything. Through File > Import > profile.xml
 # A simple implementation were not possible due to simplewall current limit of 256 characters per rule.
 # I built this to myself mostly, but to support most, in a complete way, it would require something like a website, to support multiple types of firewall and games, while automating as much as possible.
+
+# Check for dupes - https://iptoolsonline.net/
 
 # Only alter the 3 below
 $GeoFence_IPs_FileName = "Overwatch2" # https://github.com/dougg0k/gaming_os_tweaker/tree/main/scripts/configs/geofence
@@ -54,7 +93,6 @@ $GamePath = "C:\program files (x86)\steam\steamapps\common\overwatch\overwatch.e
 
 $GeofenceListPath = "$(Split-Path -Path $PSScriptRoot -Parent)\configs\geofence\$($GeoFence_IPs_FileName)_IPs.txt"
 $Content = Get-Content -path $GeofenceListPath
-
 $IsFromRegionToConnect = $false
 $BlockedIPs = ""
 $RulesItems = @();
@@ -88,11 +126,16 @@ for ($i = 0; $i -lt $Content.Length; $i++) {
 		}
     	$TempEndStorage += $IP
 	 
-		$WFIP = $Line.Trim() + ','
+		$WFIP = $Line.Trim()
         if ($WFIP.Length -le 1) {
             continue
         }
-  		$WindowsFirewallBlockedIPs += $WFIP
+        if ($WFIP.Contains('/')) {
+            $WFIPRightRange = Get-Broadcast -addressAndCidr $WFIP
+            $WFIP = "$($WFIP.Split('/')[0])-$WFIPRightRange"
+        }
+        $IPRange = $WFIP + ','
+  		$WindowsFirewallBlockedIPs += $IPRange
     }
 }
 
