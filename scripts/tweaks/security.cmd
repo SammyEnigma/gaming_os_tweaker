@@ -149,7 +149,7 @@ REG ADD "HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DNS\Parameters" /v
 :: Improve Windows firewall settings - Recommended to use https://www.binisoft.org/wfc as enhancer of Windows Firewall.
 netsh advfirewall set allprofiles firewallpolicy blockinbound,blockoutbound
 netsh advfirewall firewall delete rule all
-netsh advfirewall set allprofiles settings unicastresponsetomulticast disabled
+netsh advfirewall set allprofiles settings unicastresponsetomulticast disable
 netsh advfirewall set currentprofile logging filename %systemroot%\system32\LogFiles\Firewall\pfirewall.log
 netsh advfirewall set currentprofile logging maxfilesize 4096
 netsh advfirewall set currentprofile logging droppedconnections enable
