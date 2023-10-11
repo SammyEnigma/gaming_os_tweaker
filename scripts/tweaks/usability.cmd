@@ -720,4 +720,7 @@ REG ADD "HKEY_CURRENT_USER\SOFTWARE\Microsoft\CTF\LangBar" /v ShowStatus /t REG_
 
 :: (Optional) Change keyboard layout to US
 :: REG ADD "HKEY_USERS\.DEFAULT\Keyboard Layout\Preload" /v 1 /t REG_SZ /d 409 /f
+
+:: Copy keyboard settings to new accounts and welcome screen
+powershell -c "Copy-UserInternationalSettingsToSystem -WelcomeScreen $True -NewUser $True"
 :: REG ADD "HKEY_CURRENT_USER\Keyboard Layout\Preload" /v 1 /t REG_SZ /d 409 /f
